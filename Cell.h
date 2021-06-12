@@ -8,18 +8,20 @@ using namespace std;
 
 class cell {
 private:
+	vector<pair<cell*, pair<double, double>>> ahead_synapses;
+	vector<pair<cell*, int>> backward_synapses;
 	double input;
-	vector<pair<cell*, double>> synapses;
+	double delta_input;
 
 	double normalization(const double& temp);
-	int find_synapse_with(cell* const a);
+	int find_ahead_synapse_with(cell* const a);
+	int find_backward_synapse_with(cell* const a);
+	double fin();
 public:
 	double output;
 
 	cell();
 	bool attach(cell*const a, const double& weight);
-	bool detach(cell* const a);
-	void clear_synapses();
-	vector<pair<cell*, double>> get_synapses();
 	bool refresh();
+	void learn(double& moment, double& speed, const double* ideal = nullptr);
 };
