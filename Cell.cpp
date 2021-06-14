@@ -59,6 +59,24 @@ bool cell::attach(cell*const a, const double& weight) {
 		return false;
 }
 
+//тоже самое, только ещё добавляется delta_weight
+bool cell::attach(cell* const a, const double& weight, const double& delta_weight) {
+	if (a != nullptr) {
+		int already_exist = this->find_ahead_synapse_with(a);
+
+		if (already_exist == -1) {
+			this->ahead_synapses.push_back({ a, {weight, delta_weight} });
+			a->backward_synapses.push_back({ this, ahead_synapses.size() - 1 });
+		}
+		else
+			this->ahead_synapses[already_exist].second = { weight, 0 };
+
+		return true;
+	}
+	else
+		return false;
+}
+
 //обычный шаг принятия информации и подготовка output, если произошёл сбой, то возвращается false
 bool cell::refresh() {
 	if (this->ahead_synapses.size() > 0) {

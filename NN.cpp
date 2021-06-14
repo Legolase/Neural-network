@@ -1,4 +1,5 @@
 #include "NN.h"
+#include <cassert>
 #include <random>
 
 int rand(const int& a, const int& b) {
@@ -22,23 +23,38 @@ void NN::update() {
 //Создаётся нейросеть с construction.size() слоями в каждом из которых first обычных нейронов
 //и second нейронов смещения
 NN::NN(const vector<pair<size_t, size_t>>& construction) : speed(0), moment(0) {
-	if (construction.size() > 2) {
-		this->resize(construction.size());
+	assert(construction.size() > 2);
+	this->resize(construction.size());
 
-		for (int i = 0; i < size(); ++i)
-			(*this)[i].resize(construction[i].first + construction[i].second);
+	for (int i = 0; i < size(); ++i)
+		(*this)[i].resize(construction[i].first + construction[i].second);
 
-		for (int i = 1; i < size(); ++i) {
-			for (int j = 0; j < construction[i].first; ++j) {
-				if (i > 0) {
-					for (int q = 0; q < (*this)[i - 1].size(); ++q)
-						(*this)[i][j].attach(&(*this)[i - 1][q], rand(-2000, 2000) / 1000.0);
-				}
-			}
+	for (int i = 1; i < size(); ++i) {
+		for (int j = 0; j < construction[i].first; ++j) {
+			for (int q = 0; q < (*this)[i - 1].size(); ++q)
+				(*this)[i][j].attach(&(*this)[i - 1][q], rand(-2000, 2000) / 1000.0);
 		}
 	}
-	else
-		exit(666);
+}
+
+//копирующий конструктор
+NN::NN(const NN& nn): moment(nn.moment), speed(nn.speed) {
+	this->resize(nn.size());
+	
+	for (int i = 0; i < size(); ++i)
+		(*this)[i].resize(nn[i].size());
+
+	for (int i = 1; i < size(); ++i) {
+		const size_t insize = (*this)[i].size();
+		for (int j = 0; j < insize; ++j) {
+			if (nn[i][j].ahead_synapses.size() > 0) {
+				for (int q = 0; q < (*this)[i - 1].size(); ++q)
+					(*this)[i][j].attach(&(*this)[i - 1][q], nn[i][j].ahead_synapses[q].second.first, nn[i][j].ahead_synapses[q].second.second);
+			}
+			else
+				(*this)[i][j].output = nn[i][j].output;
+		}
+	}
 }
 
 //задаёт входные данные

@@ -7,8 +7,7 @@
 using namespace std;
 
 class cell {
-private:
-	vector<pair<cell*, pair<double, double>>> ahead_synapses;
+protected:
 	vector<pair<cell*, int>> backward_synapses;
 	double input;
 	double delta_input;
@@ -18,10 +17,12 @@ private:
 	int find_backward_synapse_with(cell* const a);
 	double fin();
 public:
+	vector<pair<cell*, pair<double, double>>> ahead_synapses;
 	double output;
 
 	cell();
 	bool attach(cell*const a, const double& weight);
+	bool attach(cell* const a, const double& weight, const double& delta_weight);
 	bool refresh();
 	void learn(double& moment, double& speed, const double* ideal = nullptr);
 };
